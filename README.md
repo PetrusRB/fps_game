@@ -93,7 +93,3 @@ Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou enviar
 ## 📄 Licença
 
 Distribuído sob a [MIT License](LICENSE). Veja o arquivo LICENSE para detalhes.
-
----
-
-Desenvolvido com simplicidade, performance e realismo em mente. Prepare-se, equipe-se e domine a partida. Boa sorte!  
