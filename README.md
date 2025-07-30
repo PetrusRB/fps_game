@@ -33,10 +33,22 @@ Em **fps_game**, você escolhe seu time — Azul ou Vermelho — e entra em aren
 
 ## ⚙️ Requisitos Mínimos
 
+# Mobile:
 - **Sistema Operacional:** Android 8.0+ / iOS 12.0+  
 - **Memória RAM:** 2 GB  
 - **Armazenamento:** 150 MB  
-- **Conexão:** Estável (Wi‑Fi ou 4G/5G)  
+- **Conexão:** Estável (Wi‑Fi ou 4G/5G) 
+
+# Computador
+- **Sistema Operacional**: Windows 10 ou superior, Linux 6.12.39-1 ou superior
+
+- **Processador**: Intel Core i3 (ou equivalente)
+
+- **RAM**: 4 GB
+
+- **Placa de Vídeo**: DirectX 11 compatível
+
+- **Armazenamento**: 500 MB
 
 ---
 
