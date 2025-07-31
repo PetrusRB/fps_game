@@ -1,14 +1,32 @@
-[gd_scene load_steps=9 format=3 uid="uid://cb00q3v12bgu0"]
+[gd_scene load_steps=13 format=3 uid="uid://cb00q3v12bgu0"]
 
 [ext_resource type="Script" uid="uid://cnpmufpdaf1sq" path="res://Scripts/player.gd" id="1_0f027"]
+[ext_resource type="Texture2D" uid="uid://dhoiu0wrqyupy" path="res://Assets/Cubemap/cloudyday.exr" id="1_d5x1h"]
 [ext_resource type="Material" uid="uid://csgqb0dpts61v" path="res://Materials/orange.tres" id="2_2c62f"]
+[ext_resource type="Material" uid="uid://bho111t66j74g" path="res://Materials/black.tres" id="2_gyfs4"]
+[ext_resource type="Material" uid="uid://bxc34lw0d2ymc" path="res://Materials/yellow.tres" id="3_8mm7a"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_gyfs4"]
-sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
-ground_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
+[sub_resource type="Shader" id="Shader_d5x1h"]
+code = "
+// NOTE: Shader automatically converted from Godot Engine 4.4.1.stable's PanoramaSkyMaterial.
+
+shader_type sky;
+
+uniform sampler2D source_panorama : filter_linear, source_color, hint_default_black;
+uniform float exposure : hint_range(0, 128) = 1.0;
+
+void sky() {
+	COLOR = texture(source_panorama, SKY_COORDS).rgb * exposure;
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8mm7a"]
+shader = SubResource("Shader_d5x1h")
+shader_parameter/source_panorama = ExtResource("1_d5x1h")
+shader_parameter/exposure = 0.7
 
 [sub_resource type="Sky" id="Sky_d5x1h"]
-sky_material = SubResource("ProceduralSkyMaterial_gyfs4")
+sky_material = SubResource("ShaderMaterial_8mm7a")
 
 [sub_resource type="Environment" id="Environment_8mm7a"]
 background_mode = 2
@@ -38,8 +56,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0862087, -0.114313, 1.0196
 script = ExtResource("1_0f027")
 
 [node name="Character" type="MeshInstance3D" parent="Player"]
+layers = 4
+material_override = ExtResource("3_8mm7a")
 mesh = SubResource("CapsuleMesh_0f027")
 skeleton = NodePath("")
+
+[node name="Glasses" type="CSGBox3D" parent="Player/Character"]
+transform = Transform3D(0.179393, 0, 0, 0, 0.239635, 0, 0, 0, 0.656851, 0.438101, 0.563359, -0.0131434)
+layers = 4
+material = ExtResource("2_gyfs4")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
 shape = SubResource("ConvexPolygonShape3D_0f027")
@@ -48,10 +73,10 @@ shape = SubResource("ConvexPolygonShape3D_0f027")
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0.706377, 0.0184422)
 
 [node name="Camera" type="Camera3D" parent="Player/Head"]
+cull_mask = 1048571
 
-[node name="Floor" type="CSGBox3D" parent="."]
-transform = Transform3D(53.0754, 0, 0, 0, 1, 0, 0, 0, 52.2371, -0.106527, -2.23385, 0.255623)
-use_collision = true
+[node name="Objects" type="Node3D" parent="Player/Head/Camera"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0438803, -0.306428, -1.56359)
 
 [node name="House" type="Node3D" parent="."]
 
@@ -61,14 +86,18 @@ use_collision = true
 transform = Transform3D(30.2473, 0, 0, 0, 6.07767, 0, 0, 0, 0.938687, -0.953727, 1.02498, -8.3003)
 use_collision = true
 
-[node name="RigidBody3D" type="RigidBody3D" parent="House"]
+[node name="PhysicsCube" type="RigidBody3D" parent="House"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.34286, 0.968233, 0.982286)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="House/RigidBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="House/PhysicsCube"]
 transform = Transform3D(1.37383, 0, 0, 0, 1.37383, 0, 0, 0, 1.37383, 0, 0, 0)
 shape = SubResource("BoxShape3D_0f027")
 debug_fill = false
 
-[node name="CSGBox3D" type="CSGBox3D" parent="House/RigidBody3D"]
+[node name="CSGBox3D" type="CSGBox3D" parent="House/PhysicsCube"]
 transform = Transform3D(1.37383, 0, 0, 0, 1.37383, 0, 0, 0, 1.37383, 0, 0, 0)
 material = ExtResource("2_2c62f")
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(53.0754, 0, 0, 0, 1, 0, 0, 0, 52.2371, -0.106527, -2.23385, 0.255623)
+use_collision = true

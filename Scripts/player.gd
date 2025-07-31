@@ -1,17 +1,26 @@
 extends CharacterBody3D
 
-# speed variables
+# variaveis de velocidades
 const WALK_SPEED = 5.0
 const RUN_SPEED = 7.0
 
-# jump variables
+# variaveis de pulo
 const JUMP_VELOCITY = 4.5
 
-# camera variables
+# variaveis de camera
 const SENSITIVITY = 0.004
-const BOB_FREQ = 2.5
-const BOB_AMP = 0.05
+
+# Headbob e inclinação
+const BOB_FREQ = 8.0
+const BOB_AMP_X = 0.02
+const BOB_AMP_Y = 0.03
+
+const MAX_CAMERA_TILT = deg_to_rad(5.0) # inclinação lateral máxima
+
 var t_bob = 0.0
+var bob_offset := Vector3.ZERO
+var target_tilt = 0.0
+var current_tilt = 0.0
 
 #fov variables
 const BASE_FOV = 75.0
@@ -37,7 +46,7 @@ func _unhandled_input(event):
 	if event is InputEventMouseMotion:
 		head.rotate_y(-event.relative.x * SENSITIVITY)
 		camera.rotate_x(-event.relative.y * SENSITIVITY)
-		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-40), deg_to_rad(60))
+		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-60), deg_to_rad(60))
 
 func _physics_process(delta: float) -> void:
 	# Add the gravity.
@@ -68,10 +77,24 @@ func _physics_process(delta: float) -> void:
 		velocity.x = lerp(velocity.x, direction.x * speed, delta * 3.0)
 		velocity.z = lerp(velocity.z, direction.z * speed, delta * 3.0)
 	
-	# Head bob
-	t_bob += delta * velocity.length() * float(is_on_floor())
-	camera.transform.origin = _headbob(t_bob)
-	
+	# Headbob
+	if direction.length() > 0.1 and is_on_floor():
+		t_bob += delta * speed
+		var bob_target = _headbob(t_bob)
+		bob_offset = bob_offset.lerp(bob_target, delta * 10.0)
+		
+		# Tilt lateral com base no input lateral
+		target_tilt = -input_dir.x * MAX_CAMERA_TILT
+	else:
+		bob_offset = bob_offset.lerp(Vector3.ZERO, delta * 5.0)
+		target_tilt = 0.0
+
+	current_tilt = lerp(current_tilt, target_tilt, delta * 10.0)
+
+	# Aplicar bob + tilt na câmera
+	camera.rotation.z = current_tilt
+	camera.position = bob_offset
+		
 	# FOV
 	var velocity_clamped = clamp(velocity.length(), 0.5, RUN_SPEED * 2)
 	var target_fov = BASE_FOV + FOV_CHANGE * velocity_clamped
@@ -79,8 +102,8 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
-func _headbob(time) -> Vector3:
+func _headbob(time: float) -> Vector3:
 	var pos = Vector3.ZERO
-	pos.y = sin(time * BOB_FREQ) * BOB_AMP
-	pos.x = cos(time * BOB_FREQ / 2) * BOB_AMP
+	pos.x = sin(time) * BOB_AMP_X   # balanço lateral
+	pos.y = abs(cos(time * 2.0)) * BOB_AMP_Y  # impacto vertical
 	return pos
